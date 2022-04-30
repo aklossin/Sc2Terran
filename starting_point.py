@@ -4,6 +4,7 @@ from sc2.main import run_game
 from sc2.data import Race, Difficulty
 from sc2.bot_ai import BotAI
 from sc2.ids.unit_typeid import UnitTypeId
+import random
 
 class GavinDestroyer(BotAI):
     async def on_step(self, iteration:int):
@@ -33,10 +34,23 @@ class GavinDestroyer(BotAI):
         else:
             if self.can_afford(UnitTypeId.COMMANDCENTER) and self.already_pending(UnitTypeId.COMMANDCENTER) < 1:
                 await self.expand_now()
+        #attack
+        if self.units(UnitTypeId.MARINE).amount >= 20:
+            if self.enemy_units:
+                for marine in self.units(UnitTypeId.MARINE).idle:
+                    marine.attack(random.choice(self.enemy_units))
+            #structures
+            elif self.enemy_structures:
+                for marine in self.units(UnitTypeId.MARINE).idle:
+                    marine.attack(random.choice(self.enemy_structures))
+            #location
+            else:
+                for marine in self.units(UnitTypeId.MARINE).idle:
+                    marine.attack(self.enemy_start_locations[0])
 
 run_game(
     maps.get("ProximaStationLE"),
     [Bot(Race.Terran, GavinDestroyer()),
-     Computer(Race.Terran, Difficulty.Hard)],
+     Computer(Race.Terran, Difficulty.Easy)],
      realtime=False
 )
